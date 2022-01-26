@@ -1,3 +1,4 @@
+import os
 from datetime import datetime
 import requests
 import smtplib
@@ -9,11 +10,10 @@ from flask_login import login_user, LoginManager, login_required, current_user, 
 from flask_ckeditor import CKEditor
 from werkzeug.security import generate_password_hash, check_password_hash
 from models import db, User, BlogPost, Comment
-
 from functools import wraps
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = '8BYkEfBA6O6donzWlSihBXox7C0sKR6b'
+app.config['SECRET_KEY'] = os.environ.get("APP_KEY")
 ckeditor = CKEditor(app)
 Bootstrap(app)
 gravatar = Gravatar(app,
@@ -122,12 +122,12 @@ def contact():
     form = ContactForm()
     data_sent = False
     if form.validate_on_submit():
-        with smtplib.SMTP(host="smtp.mail.yahoo.com", port=587) as conn:
+        with smtplib.SMTP(host=os.environ.get("SMTP_HOST"), port=587) as conn:
             conn.starttls()
-            conn.login(user="koeda1990@yahoo.com", password="tannniieaqzfxqvr")
+            conn.login(user=os.environ.get("SMTP_MAIL"), password=os.environ.get("SMTP_KEY"))
             conn.sendmail(
-                from_addr="koeda1990@yahoo.com",
-                to_addrs="steffen.loebrich@gmx.de",
+                from_addr=os.environ.get("SMTP_MAIL"),
+                to_addrs=os.environ.get("RECIP_MAIL"),
                 msg=f"Subject:New Message\n\n"
                     f"Name: {form.name.data}\n"
                     f"Email: {form.email.data}\n"
